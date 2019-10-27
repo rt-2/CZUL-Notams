@@ -1,26 +1,19 @@
 <?php
 
-/**
- * notam short summary.
- *
- * notam description.
- *
- * @version 1.0
- * @author rt-2
- */
 class Notam
 {
-    private $airport = null;
-    private $time_from = null;
-    private $time_to = null;
-    private $time_human = null;
-    private $text = null;
+    public $ident = null;
+    public $airport = null;
+    public $time_from = null;
+    public $time_to = null;
+    public $time_human = null;
+    public $text = null;
 
 
     public function __construct($configArray) {
     
 
-
+        if(isset($configArray['ident'])) $this->ident = $configArray['ident'];
         if(isset($configArray['airport'])) $this->airport = $configArray['airport'];
         if(isset($configArray['time_from'])) $this->time_from = $configArray['time_from'];
         if(isset($configArray['time_to'])) $this->time_to = $configArray['time_to'];
@@ -30,23 +23,27 @@ class Notam
 
 
     }
-    function GetAirport()
+    public function GetIdent()
+    {
+        return $this->ident;
+    }
+    public function GetAirport()
     {
         return $this->airport;
     }
-    function GetTimeFrom()
+    public function GetTimeFrom()
     {
         return $this->time_from;
     }
-    function GetTimeTo()
+    public function GetTimeTo()
     {
         return $this->time_to;
     }
-    function GetTimeHuman()
+    public function GetTimeHuman()
     {
         return $this->time_human;
     }
-    function GetText()
+    public function GetText()
     {
         return $this->text;
     }

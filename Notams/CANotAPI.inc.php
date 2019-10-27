@@ -7,6 +7,10 @@
 	//		
 	//
 	//
+    
+    require_once('includes/definitions.inc.php');
+    require_once('includes/notam.class.inc.php');
+
 
 	//
 	//	FUNCTION: CANotAPI_GetUrlData
@@ -82,7 +86,8 @@
 		$result_json = json_decode($result, true);
 		
         $all_notams_list = $result_json['data'];
-
+        
+        echo '<br /><br />';
 
 		foreach($all_notams_list as $notam_data)
 		{
@@ -90,31 +95,43 @@
 			$this_notam_isSearched = false;
 			$this_notam_isGoodAirport = false;
             $this_notam_text = $notam_data['text'];
-            $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10})\s)(?:C\)\s(?<time_to>\d{10})\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$))/";
+            $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10}(?:\w{3})?)\s)(?:C\)\s(?<time_to>\d{10}(?:\w{3})?)\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$)))/mUu";
             
             //echo '<br><br>';
             //var_dump($this_notam_text);
             preg_match($regex, $this_notam_text, $matches);
-
             //print_r(array_filter($matches));
+            if(false)
+            {
+                echo '<textarea>';
+                echo '<br>$regex<br>';
+                var_dump($regex);
+                echo '</textarea>';
+                echo '<br>$notam_data<br>';
+                var_dump($notam_data);
+                echo '<br>$matches<br>';
+                json_encode($matches);
+            
+            }//var_dump($matches);
+            
+            //echo '<br>';
+            //var_dump($matches['message_en']);
+            //var_dump($matches['message']);
+            
+            //echo '<br>';
 
-            //echo '<textarea>';
-            //echo '<br>$regex<br>';
-            //var_dump($regex);
-            //echo '</textarea>';
-            //echo '<br>$notam_data<br>';
-            //var_dump($notam_data);
-            //echo '<br>$matches<br>';
-            //json_encode($matches);
-            //var_dump($matches);
             $this_notam_obj = New Notam([
-                'airport' => $matches['airport'],
+                'ident' => $matches['id'],
+                'airport' => $matches['icao'],
                 'time_from' => $matches['time_from'],
-                'timeTo' => $matches['time_to'],
+                'time_to' => $matches['time_to'],
                 'time_human' => $matches['time_human'],
-                'text' => ( isset($matches['message_en']) ? $matches['message_en'] : $matches['message'] ),
+                'text' => ( isset($matches['message_en']) && strlen($matches['message_en']) > 0 ? $matches['message_en'] : $matches['message'] ),
             ]);
-
+            //var_dump($search);
+            //var_dump($this_notam_obj);
+            //var_dump($airport);
+            //var_dump($this_notam_obj->GetAirport() === $airport);
             
 
 
@@ -124,7 +141,7 @@
 
 
 
-            if($notam_data['location'] === $airport)
+            if($this_notam_obj->GetAirport() === $airport)
             {
 			    $this_notam_isGoodAirport = true;
             }
@@ -132,17 +149,20 @@
 			if(!is_array($search))
 			{
 				//search is a string
-				if(strpos($this_notam_text, strtoupper($search))) $this_notam_isSearched = true;
+				if(strpos($this_notam_obj->GetText(), strtoupper($search)) !== false) $this_notam_isSearched = true;
 			}
 			else
 			{
 				//search is an array
 				foreach($search as $search_text)
 				{
-					if(strpos($this_notam_text, strtoupper($search_text))) $this_notam_isSearched = true;
+					if(strpos($this_notam_obj->GetText(), strtoupper($search_text)) !== false) $this_notam_isSearched = true;
 				}
 			}
             
+            //var_dump($this_notam_obj->GetText());
+            //var_dump($this_notam_isGoodAirport);
+            //var_dump($this_notam_isSearched);
 			// Check if the Notam is actually for the searched airport
 			if($this_notam_isSearched && $this_notam_isGoodAirport)
 			{
@@ -179,8 +199,15 @@
 						//$classes .= ' CANotAPI_Notam_timeUndef';
 					//}
 					
-					// Add Notam to return string
-					$ret .= '<span class="'.$classes.'">'.$this_notam_obj->GetText().'</span><br><br>';
+                    if(strlen($this_notam_obj->GetText()) > 0)
+                    {
+					    // Add Notam to return string
+					    $ret .= '<span class="'.$classes.'">';
+					    $ret .= '<b>'.$this_notam_obj->GetAirport().'</b> - '.$this_notam_obj->GetIdent().'<br>';
+					    $ret .= $this_notam_obj->GetText().'<br>';
+					    $ret .= '<small><u>'.$this_notam_obj->GetTimeFrom().' to '.$this_notam_obj->GetTimeTo().'</u></small>';
+					    $ret .= '</span><br><br>';
+                    }
 				//}
 			}
         }
@@ -278,6 +305,8 @@
 		return true;
 	}
 	
+
+
 	//
 	//	CLASS: CANotAPI_Notam
 	//	PURPOSE: represent a NOTAM
