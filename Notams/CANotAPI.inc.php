@@ -11,6 +11,8 @@
     require_once('includes/definitions.inc.php');
     require_once('includes/notam.class.inc.php');
     
+    
+    $total_shown_notams = 0;
 
 	//
 	//	FUNCTION: CANotAPI_GetReadableDate
@@ -117,6 +119,7 @@
         $all_notams_list = $result_json['data'];
         
         //echo '<br /><br />';
+        
 
 		foreach($all_notams_list as $notam_data)
 		{
@@ -126,8 +129,8 @@
             $this_notam_text = $notam_data['text'];
             $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10}(?:\w{3})?)\s)(?:C\)\s(?<time_to>\d{10}(?:\w{3})?)\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$)))/mUu";
             
-            echo '<br><br>';
-            var_dump($this_notam_text);
+            //echo '<br><br>';
+            //var_dump($this_notam_text);
             preg_match($regex, $this_notam_text, $matches);
             //print_r(array_filter($matches));
             if(false)
@@ -140,8 +143,8 @@
                 var_dump($notam_data);
                 echo '<br>$matches<br>';
                 json_encode($matches);
-            
-            }var_dump($matches);
+                var_dump($matches);
+            }
             
             //echo '<br>';
             //var_dump($matches['message_en']);
@@ -193,7 +196,6 @@
             //var_dump($this_notam_isGoodAirport);
             //var_dump($this_notam_isSearched);
 
-            $total_shown_notams = 0;
 
 			// Check if the Notam is actually for the searched airport
 			if($this_notam_isSearched && $this_notam_isGoodAirport)
@@ -239,6 +241,7 @@
 					    $ret .= $this_notam_obj->GetText().'<br>';
 					    $ret .= '<small><u>'.$this_notam_obj->GetTimeFrom().' to '.$this_notam_obj->GetTimeTo().'</u></small>';
 					    $ret .= '</span><br><br>';
+                        global $total_shown_notams;
                         $total_shown_notams++;
                     }
 				//}
@@ -335,17 +338,19 @@
 
 	function CANotAPI_EchoNotamsString($airport, $search, $showFooter = true)
 	{
+        global $total_shown_notams;
 		echo CANotAPI_GetNotamsString($airport, $search, $showFooter);
         if(strlen($airport) > 0)
         {
             echo '<br><br>';
             echo '<small>';
-            echo 'Showing '.+$total_shown_notams.' NOTAMs for '.$airport;
+            echo 'Showing '.$total_shown_notams.' NOTAMs for '.$airport;
             echo '</small>';
         }
 		return true;
 	}
 	
+    // Var(s)
 
 
 	//
