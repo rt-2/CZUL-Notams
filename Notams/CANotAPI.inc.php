@@ -90,6 +90,39 @@
 			$this_notam_isSearched = false;
 			$this_notam_isGoodAirport = false;
             $this_notam_text = $notam_data['text'];
+            $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10})\s)(?:C\)\s(?<time_to>\d{10})\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$))/";
+            
+            //echo '<br><br>';
+            //var_dump($this_notam_text);
+            preg_match($regex, $this_notam_text, $matches);
+
+            //print_r(array_filter($matches));
+
+            //echo '<textarea>';
+            //echo '<br>$regex<br>';
+            //var_dump($regex);
+            //echo '</textarea>';
+            //echo '<br>$notam_data<br>';
+            //var_dump($notam_data);
+            //echo '<br>$matches<br>';
+            //json_encode($matches);
+            //var_dump($matches);
+            $this_notam_obj = New Notam([
+                'airport' => $matches['airport'],
+                'time_from' => $matches['time_from'],
+                'timeTo' => $matches['time_to'],
+                'time_human' => $matches['time_human'],
+                'text' => ( isset($matches['message_en']) ? $matches['message_en'] : $matches['message'] ),
+            ]);
+
+            
+
+
+
+            //echo '<br><br>';
+
+
+
 
             if($notam_data['location'] === $airport)
             {
@@ -147,7 +180,7 @@
 					//}
 					
 					// Add Notam to return string
-					$ret .= '<span class="'.$classes.'">'.$this_notam_text.'</span><br><br>';
+					$ret .= '<span class="'.$classes.'">'.$this_notam_obj->GetText().'</span><br><br>';
 				//}
 			}
         }
