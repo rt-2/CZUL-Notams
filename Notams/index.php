@@ -16,19 +16,22 @@ $icaoInput = strtoupper($_POST['icao']);
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <style>
     .CANotAPI_Notam_active {
-    background-color: lightgreen;
+        background-color: lightgreen;
     }
     .CANotAPI_Notam_soonActive {
-    background-color: yellow;
+        background-color: yellow;
     }
     .CANotAPI_Notam_inactive {
-    background-color: red;
+        background-color: red;
     }
     .CANotAPI_Notam_timeUndef {
-    background-color: gray;
+        background-color: gray;
     }
-    #search, #result {
-    padding: 5px;
+    #search {
+        padding: 5px;
+    }
+    #result {
+        padding: 25px;
     }
     </style>
     <script>
