@@ -26,7 +26,6 @@
 		$ch = curl_init();
 		// Set the url, number of POST vars, POST data
 		curl_setopt($ch,CURLOPT_URL, $url.'?'.$fields_string);
-        //echo $url.'?'.$fields_string;
 		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, false);
 		// Execute post
 		ob_start();
@@ -50,8 +49,6 @@
 	//
 	function CANotAPI_GetNotamsString($airport, $search, $showFooter = true)
 	{
-        //echo '<br><br>';
-        //echo '<br><br>';
 		//
 		// Variables
 		//
@@ -73,14 +70,7 @@
         ]);
 		$result_json = json_decode($result, true);
         $airportGeoPoint = $result_json['data'][0]['geometry']['coordinates'];
-        //echo json_encode($airportGeoPoint);
-        //echo '<br><br>';
-        //echo '<br><br>';
         $airportName = $result_json['data'][0]['properties']['displayName'];
-        //echo 'NOTAMs for ';
-        //echo json_encode($airportName);
-        //echo '<br><br>';
-        //echo '<br><br>';
 		$result = CANotAPI_GetUrlData('https://plan.navcanada.ca/weather/api/alpha/', [
 			'point' => urlencode($airportGeoPoint[0].','.$airportGeoPoint[1].','.$airport.',site'),
 			'alpha' => urlencode('notam'),
@@ -90,7 +80,6 @@
 
 		
 		$result_json = json_decode($result, true);
-        //echo json_encode($result_json['data']);
 		
         $all_notams_list = $result_json['data'];
 
@@ -98,11 +87,9 @@
 		foreach($all_notams_list as $notam_data)
 		{
             
-            //echo json_encode($notam_data);
 			$this_notam_isSearched = false;
 			$this_notam_isGoodAirport = false;
             $this_notam_text = $notam_data['text'];
-            //echo $this_notam_text;
 
             if($notam_data['location'] === $airport)
             {
@@ -163,8 +150,6 @@
 					$ret .= '<span class="'.$classes.'">'.$this_notam_text.'</span><br><br>';
 				//}
 			}
-            //echo '<br><br>';
-            //echo json_encode($notam_data);
         }
         /*
 		// Check every notams
