@@ -12,7 +12,7 @@
 	//	FUNCTION: CANotAPI_GetUrlData
 	//	PURPOSE: returns the string of data from a remote URL
 	//	ARGUMENTS:
-	//		$url: String of the url to be ;
+	//		$url: String of the url to be queried;
 	//		$fields: Array of key/value containng the query data (GET);
 	//	RETURNS: A string with all data responsded.
 	//
@@ -245,4 +245,11 @@
 		return true;
 	}
 	
+	//
+	//	CLASS: CANotAPI_Notam
+	//	PURPOSE: represent a NOTAM
+	//	ARGUMENTS:
+	//		$data: String of the url to be ;
+	//		$fields: Array of key/value containng the query data (GET);
+	//
 ?>
