@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<?php
+$icaoInput = '';
+if(isset($_POST['icao']) && strlen($_POST['icao']) == 4)
+{
+    require('./CANotAPI.inc.php');
+    $icaoInput = $_POST['icao'];
+}
+?>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -75,24 +83,15 @@
     <div id="search">
       <form action="" method="POST">
         Airport ICAO:
-        <input name="icao" type="text" maxlength="4" />
+        <input name="icao" type="text" maxlength="4" value="<?=$icaoInput?>" />
         <input type="submit" value="Search" />
       </form>
     </div>
     <div id="result">
     <?php
-      if(isset($_POST['icao']) && strlen($_POST['icao']) == 4)
+      if(strlen($icaoInput) == 4)
       {
-        // Requires the CANotAPI script from this package
-        require('./CANotAPI.inc');
-
-        //
-        //	Show notams with a list or search words
-        //
-        //echo '<h2>Important Notams for CYUL</h2>';
-
-        // This function echos the html result
-        CANotAPI_EchoNotamsString($_POST['icao'], ['CLSD', 'NOT AUTH'], false);
+        CANotAPI_EchoNotamsString($icaoInput, ['CLSD', 'NOT AUTH'], false);
       }
     ?>
     </div>
