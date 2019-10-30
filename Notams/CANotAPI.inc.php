@@ -1,12 +1,12 @@
 <?php
-	//
-	//
-	//	FILE: CANotAPI (Canadian Notam API)
-	//	BY: rt-2(http://www.rt-2.net)
-	//	PROJECT: https://github.com/rt-2/CANotAPI/
-	//		
-	//
-	//
+//////////////////
+		//	FILE: CANotAPI (Canadian Notam API)
+		//	BY: rt-2(http://www.rt-2.net)
+		//	PROJECT: https://github.com/rt-2/CANotAPI/
+		/		
+	>
+
+		/////////////////////////////////////////////////////////////////////////////
     
     require_once('includes/definitions.inc.php');
     require_once('includes/notam.class.inc.php');
