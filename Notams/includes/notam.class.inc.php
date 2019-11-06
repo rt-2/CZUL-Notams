@@ -20,9 +20,9 @@ class Notam
         if(isset($configArray['text'])) $this->text = $configArray['text'];
         if(isset($configArray['time_human'])) $this->text .= ' '.$configArray['time_human'];
         
-            $this->text = str_replace ( ',' , '' , $this->text);
-            $this->text = str_replace ( '.' , '' , $this->text);
-            $this->text = str_replace ( PHP_EOL  , '' , $this->text);
+        $this->text = str_replace ( ',' , '' , $this->text);
+        $this->text = str_replace ( '.' , '' , $this->text);
+        $this->text = str_replace ( PHP_EOL  , '' , $this->text);
 
 
     }
