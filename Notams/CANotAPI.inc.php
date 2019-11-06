@@ -22,23 +22,10 @@
 	//
 	function CANotAPI_GetReadableDate($date10char)
 	{
-		// Url-ify the data for the POST
-        $fields_string = '';
-		foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-		rtrim($fields_string, '&');
-		// Open curl connection
-		$ch = curl_init();
-		// Set the url, number of POST vars, POST data
-		curl_setopt($ch,CURLOPT_URL, $url.'?'.$fields_string);
-		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, false);
-		// Execute post
-		ob_start();
-		curl_exec($ch);
-		$result = ob_get_contents();
-		ob_end_clean();
-		// Close connection
-		curl_close($ch);
-        return $result;
+        $result_str = '';
+        preg_match_all("/^(?<year>\d{2})(?<month>\d{2})(?<day>\d{2})(?<zulu>\d{4})$/", $date10char, $data);
+        $result_str = '20'.$data[year][0].'-'.$data[month][0].'-'.$data[day][0].' '.$data[zulu][0].'Z';
+        return $result_str;
     }
 
 	//
@@ -237,7 +224,7 @@
 					    $ret .= '<span class="'.$classes.'">';
 					    $ret .= '<b>'.$this_notam_obj->GetAirport().'</b> - '.$this_notam_obj->GetIdent().'<br>';
 					    $ret .= $this_notam_obj->GetText().'<br>';
-					    $ret .= '<small><u>'.$this_notam_obj->GetTimeFrom().' to '.$this_notam_obj->GetTimeTo().'</u></small>';
+					    $ret .= '<small><u>'.CANotAPI_GetReadableDate($this_notam_obj->GetTimeFrom()).' to '.CANotAPI_GetReadableDate($this_notam_obj->GetTimeTo()).'</u></small>';
 					    $ret .= '</span><br><br>';
                         global $total_shown_notams;
                         $total_shown_notams++;
