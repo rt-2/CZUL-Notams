@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <?php
 $icaoInput = '';
-if(isset($_POST['icao']) && strlen($_POST['icao']) == 4)
+if(isset($_REQUEST['icao']) && strlen($_REQUEST['icao']) == 4)
 {
-require('./CANotAPI.inc.php');
-$icaoInput = strtoupper($_POST['icao']);
+	require('./CANotAPI.inc.php');
+	$icaoInput = strtoupper($_REQUEST['icao']);
 }
 ?>
 <html>
