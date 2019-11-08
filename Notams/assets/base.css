@@ -1,0 +1,51 @@
+﻿* {
+    margin: 0 0;
+    padding: 0 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+}
+
+content, header, content, footer, aside, main, nav {
+    display: block;
+    position: relative;
+}
+
+div {
+}
+
+h1 {
+    margin: 0 0;
+    padding: 0 0;
+}
+h2 {
+    margin: 0 0;
+    padding: 0 0;
+}
+h3 {
+    margin: 0 0;
+    padding: 0 0;
+}
+h4 {
+    margin: 0 0;
+    padding: 0 0;
+}
+h5 {
+    margin: 0 0;
+    padding: 0 0;
+}
+h6 {
+    margin: 0 0;
+    padding: 0 0;
+}
+
+a {
+    color: inherit;
+}
+
+.button {
+    cursor: pointer;
+    user-select: none;
+}

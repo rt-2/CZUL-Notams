@@ -6,8 +6,8 @@
 		//
 		/////////////////////////////////////////////////////////////////////////////
     
-    require_once('includes/definitions.inc.php');
-    require_once('includes/notam.class.inc.php');
+    require_once(dirname(__FILE__).'/includes/definitions.inc.php');
+    require_once(dirname(__FILE__).'/includes/notam.class.inc.php');
     
     
     $total_shown_notams = 0;
@@ -56,23 +56,48 @@
 		curl_close($ch);
         return $result;
     }
-
+    
 	//
-	//	FUNCTION: CANotAPI_GetNotamsString
-	//	PURPOSE: returns the string of notams from an airport search
+	//	FUNCTION: CANotAPI_GetNotamsSearch
+	//	PURPOSE: returns all ids of notams from an airport search
 	//	ARGUMENTS:
 	//		$airport: String of the canadian airport you want to search notams for;
 	//		$search: String or array of strings of keyword(s) that notam must contain to be shown;
-	//		$showFooter: Boolean default:true, set to false if you want to remove the footer or
-	//			alternatively change its style with class 'CANotAPI_Footer';
-	//	RETURNS: A string with all relevant notams.
+	//	RETURNS: An array with all relevant notams.
 	//
-	function CANotAPI_GetNotamsString($airport, $search, $showFooter = true)
+	function CANotAPI_GetHTMLBiutifulForNotam($this_notam_obj)
+	{
+    
+		$ret = '';
+		$classes = 'CANotAPI_Notam';
+
+        if(strlen($this_notam_obj->GetText()) > 0)
+        {
+			// Add Notam to return string
+			$ret .= '<span class="'.$classes.'">';
+			$ret .= '<b>'.$this_notam_obj->GetAirport().'</b> - '.$this_notam_obj->GetIdent().'<br>';
+			$ret .= $this_notam_obj->GetText().'<br>';
+			$ret .= '<small><u>'.CANotAPI_GetReadableDate($this_notam_obj->GetTimeFrom()).' to '.CANotAPI_GetReadableDate($this_notam_obj->GetTimeTo()).'</u></small>';
+			$ret .= '</span><br><br>';
+            global $total_shown_notams;
+            $total_shown_notams++;
+        }
+        return $ret;
+    }
+	//
+	//	FUNCTION: CANotAPI_GetNotamsSearch
+	//	PURPOSE: returns all ids of notams from an airport search
+	//	ARGUMENTS:
+	//		$airport: String of the canadian airport you want to search notams for;
+	//		$search: String or array of strings of keyword(s) that notam must contain to be shown;
+	//	RETURNS: An array with all relevant notams.
+	//
+	function CANotAPI_GetNotamsSearch($airport, $search)
 	{
 		//
 		// Variables
 		//
-		$ret = '';
+		$ret = [];
 		$fields_string = '';
 		$airport = strtoupper($airport);
 		$time_format = 'ymdHi';
@@ -84,33 +109,34 @@
 		//
 		// Access Remote Server
 		//
-		$result = CANotAPI_GetUrlData('https://plan.navcanada.ca/weather/api/search/en', [
+        $args = [
 			'filter[value]' => urlencode($airport),
 			'_' => urlencode(time()),
-        ]);
+        ];
+		$result = CANotAPI_GetUrlData('https://plan.navcanada.ca/weather/api/search/en', $args);
 		$result_json = json_decode($result, true);
         $airportGeoPoint = $result_json['data'][0]['geometry']['coordinates'];
         $airportName = $result_json['data'][0]['properties']['displayName'];
-		$result = CANotAPI_GetUrlData('https://plan.navcanada.ca/weather/api/alpha/', [
+        
+        $args = [
 			'point' => urlencode($airportGeoPoint[0].','.$airportGeoPoint[1].','.$airport.',site'),
 			'alpha' => urlencode('notam'),
 			'metar_historical_hours' => urlencode('1'),
 			'_' => urlencode(time()),
-        ]);
+        ];
+		$result = CANotAPI_GetUrlData('https://plan.navcanada.ca/weather/api/alpha/', $args);
 
 		
 		$result_json = json_decode($result, true);
 		
         $all_notams_list = $result_json['data'];
-        
-        //echo '<br /><br />';
+
+
         
 
 		foreach($all_notams_list as $notam_data)
 		{
             
-			$this_notam_isSearched = false;
-			$this_notam_isGoodAirport = false;
             $this_notam_text = $notam_data['text'];
             $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10}(?:\w{3})?)\s)(?:C\)\s(?<time_to>\d{10}(?:\w{3})?)\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$)))/mUu";
             
@@ -145,6 +171,48 @@
                 'time_human' => $matches['time_human'],
                 'text' => ( isset($matches['message_en']) && strlen($matches['message_en']) > 0 ? $matches['message_en'] : $matches['message'] ),
             ]);
+
+            $ret[] = $this_notam_obj;
+
+        }
+
+		return $ret;
+	}
+	
+	//
+	//	FUNCTION: CANotAPI_GetNotamsString
+	//	PURPOSE: returns the string of notams from an airport search
+	//	ARGUMENTS:
+	//		$airport: String of the canadian airport you want to search notams for;
+	//		$search: String or array of strings of keyword(s) that notam must contain to be shown;
+	//		$showFooter: Boolean default:true, set to false if you want to remove the footer or
+	//			alternatively change its style with class 'CANotAPI_Footer';
+	//	RETURNS: A string with all relevant notams.
+	//
+	function CANotAPI_GetNotamsString($airport, $search, $showFooter = true)
+	{
+		//
+		// Variables
+		//
+		$ret = '';
+		$fields_string = '';
+		$airport = strtoupper($airport);
+		$time_format = 'ymdHi';
+		$time_obj = new DateTime("now", new DateTimeZone('UTC'));
+		$time_now = $time_obj->format($time_format);
+		$time_obj->add(new DateInterval('PT6H'));
+		$time_soon = $time_obj->format($time_format);
+
+
+		$all_notams_list = CANotAPI_GetNotamsSearch($airport, $search);
+        
+		foreach($all_notams_list as $this_notam_obj)
+		{
+            
+
+
+			$this_notam_isSearched = false;
+			$this_notam_isGoodAirport = false;
             //var_dump($search);
             //var_dump($this_notam_obj);
             //var_dump($airport);
@@ -190,46 +258,8 @@
 				//{
 					// Variables
 					//$Already_Notam_List[$this_notam_id] = true;
-					$classes = 'CANotAPI_Notam';
-					//preg_match('/[0-9]{10} TIL[ A-Z]+[0-9]{10}/', $this_notam_text, $this_notam_active_text);
-					
-					// Check if Notam contains validity times
-					//if(isset( $this_notam_active_text[0] ))
-					//{
-						// Variables
-						//$this_notam_active_begin = substr($this_notam_active_text[0], 0, 10);
-						//$this_notam_active_end = substr($this_notam_active_text[0], -10);
-						
-						// Check if Notam is active, not active, or active soon.
-						//if($this_notam_active_begin < $time_now and $time_now < $this_notam_active_end) {
-							// Notam is active
-							//$classes .= ' CANotAPI_Notam_active';
-						//} elseif ($this_notam_active_begin < $time_soon and $time_soon < $this_notam_active_end) {
-							// Notam is active soon
-							//$classes .= ' CANotAPI_Notam_soonActive';
-						//} else {
-							// Notam is not active
-							//$classes .= ' CANotAPI_Notam_inactive';
-						//}
-					//}
-					//else
-					//{
-						// Notam has no time specified
-						//$classes .= ' CANotAPI_Notam_timeUndef';
-					//}
-					
-                    if(strlen($this_notam_obj->GetText()) > 0)
-                    {
-					    // Add Notam to return string
-					    $ret .= '<span class="'.$classes.'">';
-					    $ret .= '<b>'.$this_notam_obj->GetAirport().'</b> - '.$this_notam_obj->GetIdent().'<br>';
-					    $ret .= $this_notam_obj->GetText().'<br>';
-					    $ret .= '<small><u>'.CANotAPI_GetReadableDate($this_notam_obj->GetTimeFrom()).' to '.CANotAPI_GetReadableDate($this_notam_obj->GetTimeTo()).'</u></small>';
-					    $ret .= '</span><br><br>';
-                        global $total_shown_notams;
-                        $total_shown_notams++;
-                    }
 				//}
+                $ret .= CANotAPI_GetHTMLBiutifulForNotam($this_notam_obj);
 			}
         }
         /*
