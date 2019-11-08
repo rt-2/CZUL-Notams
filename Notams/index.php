@@ -154,12 +154,13 @@ function GetAllMandatoryForICAO($icao)
     }
     ?>
     <div id="result">
-
+        
         <?php
         if($mustShowSearchUi)
         {
             ?>
             <hr />
+            <br />
             <?php
         }
         $echoedNotams = 0;
