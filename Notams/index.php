@@ -213,7 +213,7 @@ function GetAllMandatoryForICAO($icao)
         ?>
         </div>
         <?php
-        if(isset($_GET['mandatory']) || isset($_GET['mandatory']))
+        if(isset($_GET['mandatory']) && !isset($_GET['nodesign']))
         {
             ?>
             <small>
