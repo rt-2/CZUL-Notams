@@ -6,6 +6,7 @@ require_once(dirname(__FILE__).'/resources/fir.data.inc.php');
 
 $icaoInput = '';
 $icaoOutside = false;
+define('NOTAM_SEARCH_PARAMS', array('CLSD', 'NOT AUTH'));
 
 if(isset($_REQUEST['icao']) && strlen($_REQUEST['icao']) == 4)
 {
@@ -40,6 +41,13 @@ if(!$icaoOutside)
 
 function GetAllMandatoryForICAO($icao)
 {
+
+    /*
+        Old Method
+            
+            Not used anymore, NOTAMs now generated automaticly all the time
+            (Previously discussed with Michel Robichaud (responsible for updating)
+    
     $ret = []; 
     foreach(CANotAPI_GetNotamsSearch($icao, ' ') as $ths_notam_obj)
     {
@@ -49,6 +57,9 @@ function GetAllMandatoryForICAO($icao)
         }
     }
     return $ret;
+    */
+
+    return CANotAPI_GetNotamsSearch($icao, NOTAM_SEARCH_PARAMS);
 }
 
 ?>
@@ -205,7 +216,7 @@ function GetAllMandatoryForICAO($icao)
                 }
                 else
                 {
-                    CANotAPI_EchoNotamsString($icaoInput, ['CLSD', 'NOT AUTH'], false);
+                    CANotAPI_EchoNotamsString($icaoInput, NOTAM_SEARCH_PARAMS, false);
 
                 }
 
