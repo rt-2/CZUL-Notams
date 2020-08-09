@@ -59,7 +59,12 @@ function GetAllMandatoryForICAO($icao)
     return $ret;
     */
 
-    return CANotAPI_GetNotamsSearch($icao, NOTAM_SEARCH_PARAMS);
+    $ret = []; 
+    foreach(CANotAPI_GetNotamsSearch($icao, NOTAM_SEARCH_PARAMS) as $ths_notam_obj)
+    {
+        $ret[] = $ths_notam_obj;
+    }
+    return $ret;
 }
 
 ?>

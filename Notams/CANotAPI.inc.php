@@ -24,7 +24,7 @@
 	{
         $result_str = '';
         preg_match_all("/^(?<year>\d{2})(?<month>\d{2})(?<day>\d{2})(?<zulu>\d{4})$/", $date10char, $data);
-        $result_str = '20'.$data[year][0].'-'.$data[month][0].'-'.$data[day][0].' '.$data[zulu][0].'Z';
+        $result_str = '20'.$data['year'][0].'-'.$data['month'][0].'-'.$data['day'][0].' '.$data['zulu'][0].'Z';
         return $result_str;
     }
 
@@ -137,31 +137,17 @@
 		foreach($all_notams_list as $notam_data)
 		{
             
+			$this_notam_isSearched = false;
+			$this_notam_isGoodAirport = false;
+
             $this_notam_text = $notam_data['text'];
             $regex = "/^\((?<id>\w\d{4}\/\d{2})\X+(?:A\)\s(?<icao>\w{4})\s)(?:B\)\s(?<time_from>\d{10}(?:\w{3})?)\s)(?:C\)\s(?<time_to>\d{10}(?:\w{3})?)\s)(?:D\)\s(?<time_human>\X+)\s)?(?:E\)\s(?:(?:(?<message_en>\X+)\sFR:\s(?<message_fr>\X+)\)$)|(?:(?<message>\X+)\)$)))/mUu";
             
             //echo '<br><br>';
             //var_dump($this_notam_text);
             preg_match($regex, $this_notam_text, $matches);
-            //print_r(array_filter($matches));
-            if(false)
-            {
-                echo '<textarea>';
-                echo '<br>$regex<br>';
-                var_dump($regex);
-                echo '</textarea>';
-                echo '<br>$notam_data<br>';
-                var_dump($notam_data);
-                echo '<br>$matches<br>';
-                json_encode($matches);
-                var_dump($matches);
-            }
-            
-            //echo '<br>';
-            //var_dump($matches['message_en']);
-            //var_dump($matches['message']);
-            
-            //echo '<br>';
+
+
 
             $this_notam_obj = New Notam([
                 'ident' => $matches['id'],
@@ -171,8 +157,35 @@
                 'time_human' => $matches['time_human'],
                 'text' => ( isset($matches['message_en']) && strlen($matches['message_en']) > 0 ? $matches['message_en'] : $matches['message'] ),
             ]);
+            
 
-            $ret[] = $this_notam_obj;
+
+
+            if($this_notam_obj->GetAirport() === $airport)
+            {
+			    $this_notam_isGoodAirport = true;
+            }
+
+			if(!is_array($search))
+			{
+				//search is a string
+				if(strpos($this_notam_obj->GetText(), strtoupper($search)) !== false) $this_notam_isSearched = true;
+			}
+			else
+			{
+				//search is an array
+				foreach($search as $search_text)
+				{
+					if(strpos($this_notam_obj->GetText(), strtoupper($search_text)) !== false) $this_notam_isSearched = true;
+				}
+			}
+            
+
+			// Check if the Notam is actually for the searched airport
+			if($this_notam_isSearched && $this_notam_isGoodAirport)
+			{
+                $ret[] = $this_notam_obj;
+			}
 
         }
 
@@ -209,131 +222,10 @@
 		foreach($all_notams_list as $this_notam_obj)
 		{
             
-
-
-			$this_notam_isSearched = false;
-			$this_notam_isGoodAirport = false;
-            //var_dump($search);
-            //var_dump($this_notam_obj);
-            //var_dump($airport);
-            //var_dump($this_notam_obj->GetAirport() === $airport);
-            
-
-
-
-            //echo '<br><br>';
-
-
-
-
-            if($this_notam_obj->GetAirport() === $airport)
-            {
-			    $this_notam_isGoodAirport = true;
-            }
-
-			if(!is_array($search))
-			{
-				//search is a string
-				if(strpos($this_notam_obj->GetText(), strtoupper($search)) !== false) $this_notam_isSearched = true;
-			}
-			else
-			{
-				//search is an array
-				foreach($search as $search_text)
-				{
-					if(strpos($this_notam_obj->GetText(), strtoupper($search_text)) !== false) $this_notam_isSearched = true;
-				}
-			}
-            
-            //var_dump($this_notam_obj->GetText());
-            //var_dump($this_notam_isGoodAirport);
-            //var_dump($this_notam_isSearched);
-
-
-			// Check if the Notam is actually for the searched airport
-			if($this_notam_isSearched && $this_notam_isGoodAirport)
-			{
-				// Check if Notam has already been displayed
-				//if(!isset($Already_Notam_List[$this_notam_id]))
-				//{
-					// Variables
-					//$Already_Notam_List[$this_notam_id] = true;
-				//}
-                $ret .= CANotAPI_GetHTMLBiutifulForNotam($this_notam_obj);
-			}
+			// Check if Notam has already been displayed
+            $ret .= CANotAPI_GetHTMLBiutifulForNotam($this_notam_obj);
         }
-        /*
-		// Check every notams
-		foreach($all_notams_indexes[0] as $key => $value)
-		{
-			// Variables
-			$this_index = $all_notams_indexes[0][$key][1];
-			$length = -1;
-			if(isset($all_notams_indexes[0][$key+1])) $length = $all_notams_indexes[0][$key+1][1] - $this_index;
-			$this_notam_id = +substr($formatted_text, $this_index, 6);
-			$this_notam_text = substr($formatted_text, $this_index, $length);
-			
-			//Check if notam is wanted.
-			$this_notam_isSearched = false;
-			if(!is_array($search))
-			{
-				//search is a string
-				if(strpos($this_notam_text, strtoupper($search))) $this_notam_isSearched = true;
-			}
-			else
-			{
-				//search is an array
-				foreach($search as $search_text)
-				{
-					if(strpos($this_notam_text, strtoupper($search_text))) $this_notam_isSearched = true;
-				}
-			}
-			
-			// Eliminate notams from other airports
-			$this_notam_isGoodAirport = preg_match('/(C[A-Z0-9]{3} [\/\-() A-Z0-9,.]+'.$airport.')/', $this_notam_text);
-			
-			// Check if the Notam is actually for the searched airport
-			if($this_notam_isSearched && $this_notam_isGoodAirport)
-			{
-				// Check if Notam has already been displayed
-				if(!isset($Already_Notam_List[$this_notam_id]))
-				{
-					// Variables
-					$Already_Notam_List[$this_notam_id] = true;
-					$classes = 'CANotAPI_Notam';
-					preg_match('/[0-9]{10} TIL[ A-Z]+[0-9]{10}/', $this_notam_text, $this_notam_active_text);
-					
-					// Check if Notam contains validity times
-					if(isset( $this_notam_active_text[0] ))
-					{
-						// Variables
-						$this_notam_active_begin = substr($this_notam_active_text[0], 0, 10);
-						$this_notam_active_end = substr($this_notam_active_text[0], -10);
-						
-						// Check if Notam is active, not active, or active soon.
-						if($this_notam_active_begin < $time_now and $time_now < $this_notam_active_end) {
-							// Notam is active
-							$classes .= ' CANotAPI_Notam_active';
-						} elseif ($this_notam_active_begin < $time_soon and $time_soon < $this_notam_active_end) {
-							// Notam is active soon
-							$classes .= ' CANotAPI_Notam_soonActive';
-						} else {
-							// Notam is not active
-							$classes .= ' CANotAPI_Notam_inactive';
-						}
-					}
-					else
-					{
-						// Notam has no time specified
-						$classes .= ' CANotAPI_Notam_timeUndef';
-					}
-					
-					// Add Notam to return string
-					$ret .= '<span class="'.$classes.'">'.$this_notam_text.'</span><br><br>';
-				}
-			}
-		}
-        */
+
 		// Add footer
 		if($showFooter) $ret .= '<span class="CANotAPI_Footer"><small>Made possible by <a href="https://github.com/rt-2/CANotAPI" target="_blank">CANotAPI</a> (Canadian Notam API)</small></span><br><br>';
 		// Return string
